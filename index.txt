@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Victor's Descent</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Swinging Wooden Board -->
+  <div class="swing-board">
+    <div class="board-text">Victor's Descent</div>
+  </div>
+
+  <!-- Welcome Modal -->
+  <div id="welcomeModal" class="modal">
+    <div class="modal-content">
+      <h1>Welcome to the Dungeon</h1>
+      <p>You are Victor — a lone swordsman entering a dangerous dungeon to rescue allies. Explore carefully and survive!</p>
+      <button id="startBtn">Enter the Dungeon</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <header class="stats-bar">
+    <div class="stat"><span class="icon">👥</span> Party: <span id="partyCount">1</span></div>
+    <div class="stat"><span class="icon">🧪</span> Potions: <span id="potions">0</span></div>
+    <div class="stat"><span class="icon">🛡️</span> Armour: <span id="armour">0</span></div>
+    <div class="stat"><span class="icon">⚔️</span> Weapons: <span id="weapons">0</span></div>
+    <div class="stat"><span class="icon">🏰</span> Rooms left: <span id="roomsLeft">64</span></div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout">
+    <!-- Game -->
+    <div id="game" class="game-grid"></div>
+
+    <!-- Dungeon Log -->
+    <aside class="log-panel">
+      <h2>Dungeon Log</h2>
+      <div id="log" class="log-entries"></div>
+    </aside>
+  </main>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button id="restart">Restart Game</button>
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

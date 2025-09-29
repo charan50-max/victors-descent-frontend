@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Victor's Descent</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="swing-board">
+    <span class="board-text">Victor's Descent</span>
+  </div>
+
+  <div class="user-bar">
+    <span id="currentUserDisplay">User: <em>Not logged in</em></span>
+    <button id="changeUserBtn" type="button">Change User</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat lives"><span class="icon">❤️</span> Lives: <span id="lives">3</span></div>
+    <div class="stat"><span class="icon">🧑‍🤝‍🧑</span> Allies: <span id="allyCount">0</span></div>
+    <div class="stat"><span class="icon">🛡️</span> Armour: <span id="armour">0</span></div>
+    <div class="stat"><span class="icon">⚔️</span> Weapons: <span id="weapons">0</span></div>
+    <div class="stat"><span class="icon">👥</span> Party: <span id="partyCount">1</span></div>
+    <div class="stat"><span class="icon">🧪</span> Potions: <span id="potions">0</span></div>
+    <div class="stat"><span class="icon">🚪</span> Rooms left: <span id="roomsLeft">64</span></div>
+    <button id="restart" type="button">Restart</button>
+    <button id="leaderboardBtn" type="button">Leaderboard</button>
+  </div>
+
+  <div class="message" id="message" aria-live="polite"></div>
+
+  <div class="main-layout">
+    <main id="game" class="game-grid" aria-label="Dungeon Grid"></main>
+    <aside class="log-panel" aria-label="Log">
+      <h2>Log</h2>
+      <div class="log-entries" id="log"></div>
+    </aside>
+  </div>
+
+  <section aria-label="Leaderboard">
+    <div id="leaderboardContainer">
+      <div id="leaderboardHeader" class="collapsible-header">Leaderboard</div>
+      <div id="leaderboardContent" class="collapsible-content">
+        <table id="leaderboardTable" class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Victories</th>
+              <th>Defeats</th>
+              <th>Rooms Explored</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- Leaderboard rows will be injected here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Login/Register Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content login-modal-content">
+      <span class="close" id="closeLoginModal">&times;</span>
+      <h2 id="loginModalTitle">Login or Register</h2>
+      <form id="loginForm">
+        <label for="usernameInput"><b>Username</b></label>
+        <input type="text" id="usernameInput" name="username" required placeholder="Enter username">
+        <button type="submit" id="loginSubmitBtn">Login/Register</button>
+        <span id="loginError" class="modal-error"></span>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
+
