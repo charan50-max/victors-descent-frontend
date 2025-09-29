@@ -1,3 +1,4 @@
+const API_BASE = 'https://victors-descent-backend.onrender.com';
 const GRID_SIZE = 8;
 const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 let grid = [];
@@ -257,7 +258,7 @@ function checkVictory() {
 }
 
 function postResult({ victory, defeat, explored }) {
-  fetch('http://localhost:3000/update-leaderboard', {
+  fetch('https://victors-descent-backend.onrender.com', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -293,7 +294,7 @@ leaderboardBtn.addEventListener("click", () => {
 });
 
 function fetchLeaderboard() {
-  fetch('http://localhost:3000/leaderboard')
+  fetch('https://victors-descent-backend.onrender.com')
     .then(response => response.json())
     .then(rows => {
       leaderboardBody.innerHTML = "";
@@ -332,7 +333,7 @@ loginForm.onsubmit = function(e) {
     loginError.textContent = "Please enter a username.";
     return;
   }
-  fetch('http://localhost:3000/register', {
+  fetch('https://victors-descent-backend.onrender.com', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username })
