@@ -1,11 +1,5 @@
-// ----------------------
-// Config
-// ----------------------
 const API_BASE = 'https://victors-descent-backend.onrender.com';
 
-// ----------------------
-// State
-// ----------------------
 const GRID_SIZE = 8;
 const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
@@ -27,44 +21,7 @@ const hero = {
   revealedCount: 0
 };
 
-// ----------------------
-// DOM
-// ----------------------
-const gameContainer = document.getElementById('game');
-const startBtn = document.getElementById('startBtn');
-const restartBtn = document.getElementById('restart');
-
-const messageDiv = document.getElementById('message');
-const logDiv = document.getElementById('log');
-
-const leaderboardBtn = document.getElementById('leaderboardBtn');
-const leaderboardContainer = document.getElementById('leaderboardContainer');
-const leaderboardHeader = document.getElementById('leaderboardHeader');
-const leaderboardContent = document.getElementById('leaderboardContent');
-const leaderboardBody = document.getElementById('leaderboardBody');
-
-const partyCountEl = document.getElementById('partyCount');
-const allyCountEl = document.getElementById('allyCount');
-const potionsEl = document.getElementById('potions');
-const armourEl = document.getElementById('armour');
-const weaponsEl = document.getElementById('weapons');
-const livesEl = document.getElementById('lives');
-const roomsLeftEl = document.getElementById('roomsLeft');
-
-const currentUserDisplay = document.getElementById('currentUserDisplay');
-const changeUserBtn = document.getElementById('changeUserBtn');
-
-// Login/welcome modal elements
-const modal = document.getElementById('welcomeModal');
-const loginModal = document.getElementById('loginModal');
-const closeLoginModal = document.getElementById('closeLoginModal');
-const loginForm = document.getElementById('loginForm');
-const usernameInput = document.getElementById('usernameInput');
-const loginError = document.getElementById('loginError');
-
-// ----------------------
-// Utilities
-// ----------------------
+// Utility functions
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -75,6 +32,7 @@ function shuffle(array) {
 
 function setMessage(txt) {
   if (messageTimeoutId) clearTimeout(messageTimeoutId);
+  const messageDiv = document.getElementById('message');
   if (messageDiv) messageDiv.innerText = txt || '';
   messageTimeoutId = setTimeout(() => {
     if (messageDiv) messageDiv.innerText = '';
@@ -83,6 +41,7 @@ function setMessage(txt) {
 }
 
 function logEvent(text, type = 'info') {
+  const logDiv = document.getElementById('log');
   if (!logDiv) return;
   const entry = document.createElement('div');
   entry.className = `log-entry ${type}`;
@@ -97,85 +56,93 @@ function message(txt, type = 'info') {
 }
 
 function updateUserDisplay() {
+  const currentUserDisplay = document.getElementById('currentUserDisplay');
   if (currentUserDisplay) {
     currentUserDisplay.innerHTML = `User: ${currentUsername || 'Not logged in'}`;
   }
 }
 
 function updateUI() {
-  if (partyCountEl) partyCountEl.innerText = hero.party;
-  if (allyCountEl) allyCountEl.innerText = hero.allies;
-  if (potionsEl) potionsEl.innerText = hero.potions;
-  if (armourEl) armourEl.innerText = hero.armour;
-  if (weaponsEl) weaponsEl.innerText = hero.weapons;
-  if (livesEl) livesEl.innerText = hero.lives;
-  if (roomsLeftEl) roomsLeftEl.innerText = Math.max(0, TOTAL_CELLS - hero.revealedCount);
+  const elements = {
+    partyCount: document.getElementById('partyCount'),
+    allyCount: document.getElementById('allyCount'),
+    potions: document.getElementById('potions'),
+    armour: document.getElementById('armour'),
+    weapons: document.getElementById('weapons'),
+    lives: document.getElementById('lives'),
+    roomsLeft: document.getElementById('roomsLeft')
+  };
+
+  if (elements.partyCount) elements.partyCount.innerText = hero.party;
+  if (elements.allyCount) elements.allyCount.innerText = hero.allies;
+  if (elements.potions) elements.potions.innerText = hero.potions;
+  if (elements.armour) elements.armour.innerText = hero.armour;
+  if (elements.weapons) elements.weapons.innerText = hero.weapons;
+  if (elements.lives) elements.lives.innerText = hero.lives;
+  if (elements.roomsLeft) elements.roomsLeft.innerText = Math.max(0, TOTAL_CELLS - hero.revealedCount);
+  
   updateUserDisplay();
 }
 
-// ----------------------
-// API helpers
-// ----------------------
-async function api(path, options = {}) {
+// API functions
+async function registerUser(username) {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-      ...options
+    const response = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username })
     });
     
-    const text = await res.text();
-    let json;
-    try { 
-      json = text ? JSON.parse(text) : {}; 
-    } catch { 
-      json = {}; 
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
     
-    if (!res.ok) {
-      const err = new Error(json?.error || `HTTP ${res.status}`);
-      err.status = res.status;
-      err.body = json;
-      throw err;
-    }
-    return json;
-  } catch (err) {
-    console.error('API Error:', err);
-    throw err;
+    const data = await response.json();
+    currentUsername = data.username || username;
+    currentUserId = data.id || null;
+    localStorage.setItem('dungeon_username', currentUsername);
+    if (currentUserId) localStorage.setItem('dungeon_user_id', currentUserId);
+    return data;
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
   }
 }
 
-// POST /register { username }
-async function registerUser(username) {
-  const data = await api('/register', {
-    method: 'POST',
-    body: JSON.stringify({ username })
-  });
-  
-  currentUsername = data.username || username;
-  currentUserId = data.id || null;
-  localStorage.setItem('dungeon_username', currentUsername);
-  if (currentUserId) localStorage.setItem('dungeon_user_id', currentUserId);
-  return data;
-}
-
-// GET /leaderboard => { leaderboard: [{ username, score }, ...] }
 async function getLeaderboard() {
-  const data = await api('/leaderboard');
-  return Array.isArray(data.leaderboard) ? data.leaderboard : [];
+  try {
+    const response = await fetch(`${API_BASE}/leaderboard`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    return Array.isArray(data.leaderboard) ? data.leaderboard : [];
+  } catch (error) {
+    console.error('Leaderboard fetch error:', error);
+    return [];
+  }
 }
 
-// POST /update-leaderboard { username, score }
 async function submitScore(username, score) {
-  const payload = { username, score: Number(score) };
-  return api('/update-leaderboard', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  });
+  try {
+    const response = await fetch(`${API_BASE}/update-leaderboard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, score: Number(score) })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Score submit error:', error);
+    throw error;
+  }
 }
 
-// ----------------------
-// Game generation
-// ----------------------
+// Game functions
 function generateRoomTypes() {
   const rooms = [];
   for (let i = 0; i < 20; i++) rooms.push({ category: 'safe', type: 'empty' });
@@ -190,14 +157,16 @@ function generateRoomTypes() {
 
 function createGrid() {
   grid = [];
-  if (gameContainer) gameContainer.innerHTML = '';
-
+  const gameContainer = document.getElementById('game');
+  if (!gameContainer) return;
+  
+  gameContainer.innerHTML = '';
   const roomTypes = generateRoomTypes();
 
   for (let i = 0; i < TOTAL_CELLS; i++) {
     const cellEl = document.createElement('div');
     cellEl.classList.add('cell');
-    if (gameContainer) gameContainer.appendChild(cellEl);
+    gameContainer.appendChild(cellEl);
 
     const room = roomTypes[i];
     grid.push({
@@ -210,6 +179,7 @@ function createGrid() {
     cellEl.addEventListener('click', () => onCellClick(i));
   }
 
+  // Reset hero stats
   hero.lives = 3;
   hero.allies = 0;
   hero.party = 1;
@@ -342,9 +312,6 @@ function checkVictory() {
   }
 }
 
-// ----------------------
-// Results -> Leaderboard
-// ----------------------
 function computeScore({ victory, defeat, explored }) {
   const bonus = victory ? 50 : 0;
   return Math.max(0, Number(explored || 0) + bonus);
@@ -354,12 +321,13 @@ async function postResult({ victory, defeat, explored }) {
   try {
     if (!currentUsername) {
       message('Login to submit your score.', 'info');
+      showLoginModal();
       return;
     }
     const score = computeScore({ victory, defeat, explored });
     await submitScore(currentUsername, score);
     message(`Score submitted: ${score}`, 'info');
-    fetchLeaderboard(); // refresh table after submit
+    fetchLeaderboard();
   } catch (e) {
     console.error('Score submit error:', e);
     message('Could not submit score.', 'death');
@@ -369,6 +337,7 @@ async function postResult({ victory, defeat, explored }) {
 async function fetchLeaderboard() {
   try {
     const rows = await getLeaderboard();
+    const leaderboardBody = document.getElementById('leaderboardBody');
     if (!leaderboardBody) return;
     
     leaderboardBody.innerHTML = '';
@@ -388,119 +357,132 @@ async function fetchLeaderboard() {
     });
   } catch (e) {
     console.error('Leaderboard error:', e);
+    const leaderboardBody = document.getElementById('leaderboardBody');
     if (leaderboardBody) {
-      leaderboardBody.innerHTML = `<tr><td colspan="2">Leaderboard error</td></tr>`;
+      leaderboardBody.innerHTML = `<tr><td colspan="2">Error loading leaderboard</td></tr>`;
     }
   }
 }
 
-// ----------------------
-// Auth / Login UI
-// ----------------------
-function openLoginModal() {
-  if (modal) modal.classList.remove('hidden');
-  if (loginModal) loginModal.classList.remove('hidden');
-  if (loginError) loginError.innerText = '';
+// Modal functions
+function showLoginModal() {
+  const modal = document.getElementById('welcomeModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
 }
 
-function closeLoginModal() {
-  if (modal) modal.classList.add('hidden');
-  if (loginModal) loginModal.classList.add('hidden');
+function hideLoginModal() {
+  const modal = document.getElementById('welcomeModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+  const usernameInput = document.getElementById('usernameInput');
   if (usernameInput) usernameInput.value = '';
-  if (loginError) loginError.innerText = '';
 }
 
-// ----------------------
-// Events
-// ----------------------
-if (startBtn) {
-  startBtn.addEventListener('click', () => {
-    createGrid();
-    logEvent('A new descent begins.', 'info');
-  });
-}
-
-if (restartBtn) {
-  restartBtn.addEventListener('click', () => {
-    createGrid();
-    logEvent('Run reset.', 'info');
-  });
-}
-
-if (changeUserBtn) {
-  changeUserBtn.addEventListener('click', openLoginModal);
-}
-
-if (closeLoginModal) {
-  closeLoginModal.addEventListener('click', closeLoginModal);
-}
-
-if (loginForm) {
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const username = (usernameInput?.value || '').trim();
-    if (!username) {
-      if (loginError) loginError.innerText = 'Username required';
-      return;
-    }
-    try {
-      await registerUser(username);
-      updateUserDisplay();
-      closeLoginModal();
-      message(`Logged in as ${currentUsername}`, 'safe');
-    } catch (err) {
-      console.error('Register error:', err);
-      if (loginError) loginError.innerText = 'Server error. Please try again.';
-    }
-  });
-}
-
-if (leaderboardHeader) {
-  leaderboardHeader.addEventListener('click', () => {
-    if (leaderboardContent) {
-      leaderboardContent.classList.toggle('collapsed');
-      if (!leaderboardContent.classList.contains('collapsed')) {
-        fetchLeaderboard();
-      }
-    }
-  });
-}
-
-if (leaderboardBtn) {
-  leaderboardBtn.addEventListener('click', () => {
-    if (leaderboardContent) {
-      leaderboardContent.classList.toggle('collapsed');
-      if (!leaderboardContent.classList.contains('collapsed')) {
-        fetchLeaderboard();
-      }
-    }
-  });
-}
-
-// ----------------------
-// Initialization
-// ----------------------
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, initializing...');
+  
+  // Update UI first
   updateUI();
   
-  // Show login modal if no user is logged in
+  // Show login modal if no user
   if (!currentUsername) {
-    openLoginModal();
+    console.log('No user found, showing login modal');
+    showLoginModal();
   }
   
-  // Load leaderboard on startup
+  // Load leaderboard
   fetchLeaderboard();
+  
+  // Set up event listeners
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) {
+    console.log('Start button found, adding listener');
+    startBtn.addEventListener('click', function() {
+      console.log('Start button clicked');
+      createGrid();
+      logEvent('A new descent begins.', 'info');
+    });
+  }
+
+  const restartBtn = document.getElementById('restart');
+  if (restartBtn) {
+    console.log('Restart button found, adding listener');
+    restartBtn.addEventListener('click', function() {
+      console.log('Restart button clicked');
+      createGrid();
+      logEvent('Run reset.', 'info');
+    });
+  }
+
+  // Login form handler
+  const loginBtn = document.querySelector('button[type="submit"]');
+  const usernameInput = document.getElementById('usernameInput');
+  
+  if (loginBtn && usernameInput) {
+    console.log('Login form found, adding listener');
+    loginBtn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      console.log('Login button clicked');
+      
+      const username = usernameInput.value.trim();
+      if (!username) {
+        message('Please enter a username', 'death');
+        return;
+      }
+      
+      try {
+        console.log('Attempting to register user:', username);
+        await registerUser(username);
+        updateUserDisplay();
+        hideLoginModal();
+        message(`Logged in as ${currentUsername}`, 'safe');
+      } catch (err) {
+        console.error('Login error:', err);
+        message('Login failed. Please try again.', 'death');
+      }
+    });
+  }
+
+  // Close modal handler
+  const closeBtn = document.getElementById('closeModal');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', hideLoginModal);
+  }
+
+  // Leaderboard button
+  const leaderboardBtn = document.getElementById('leaderboardBtn');
+  if (leaderboardBtn) {
+    console.log('Leaderboard button found, adding listener');
+    leaderboardBtn.addEventListener('click', function() {
+      console.log('Leaderboard button clicked');
+      const leaderboardContainer = document.getElementById('leaderboardContainer');
+      if (leaderboardContainer) {
+        const isHidden = leaderboardContainer.style.display === 'none';
+        leaderboardContainer.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+          fetchLeaderboard();
+        }
+      }
+    });
+  }
+
+  // Change user button
+  const changeUserBtn = document.getElementById('changeUserBtn');
+  if (changeUserBtn) {
+    changeUserBtn.addEventListener('click', showLoginModal);
+  }
+
+  console.log('Initialization complete');
 });
 
-// Fallback initialization if DOMContentLoaded already fired
-if (document.readyState === 'loading') {
-  // DOMContentLoaded listener above will handle this
-} else {
-  // DOM already loaded
-  updateUI();
-  if (!currentUsername) {
-    openLoginModal();
-  }
-  fetchLeaderboard();
+// Fallback for already loaded DOM
+if (document.readyState !== 'loading') {
+  document.dispatchEvent(new Event('DOMContentLoaded'));
 }
 
