@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  const restartBtn = document.getElementById('restart');
+  const restartBtn = document.getElementById('restartBtn');
   if (restartBtn) {
     restartBtn.addEventListener('click', function() {
       if (!currentUsername) {

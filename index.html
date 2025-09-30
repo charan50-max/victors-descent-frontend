@@ -26,50 +26,65 @@
         <h1 class="board-text">VICTOR'S DESCENT</h1>
     </div>
 
-    <div class="stats-bar">
-        <div class="stat">
-            <div class="icon heart-icon"></div>
+    <!-- User Info Bar -->
+    <div class="user-info-bar">
+        <span id="currentUserDisplay">User: CHARAN123</span>
+        <button id="changeUserBtn">CHANGE USER</button>
+    </div>
+
+    <!-- Status Bar with Emojis -->
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="status-emoji">❤️</span>
+            <span class="status-label">Lives:</span>
             <span id="lives">3</span>
         </div>
-        <div class="stat">
-            <div class="icon party-icon"></div>
-            <span id="partyCount">1</span>
+        <div class="status-item">
+            <span class="status-emoji">👥</span>
+            <span class="status-label">Allies:</span>
+            <span id="allyCount">6</span>
         </div>
-        <div class="stat">
-            <div class="icon ally-icon"></div>
-            <span id="allyCount">0</span>
+        <div class="status-item">
+            <span class="status-emoji">🛡️</span>
+            <span class="status-label">Armour:</span>
+            <span id="armour">1</span>
         </div>
-        <div class="stat">
-            <div class="icon potion-icon"></div>
-            <span id="potions">0</span>
+        <div class="status-item">
+            <span class="status-emoji">⚔️</span>
+            <span class="status-label">Weapons:</span>
+            <span id="weapons">1</span>
         </div>
-        <div class="stat">
-            <div class="icon armour-icon"></div>
-            <span id="armour">0</span>
+        <div class="status-item">
+            <span class="status-emoji">👨‍👩‍👧‍👦</span>
+            <span class="status-label">Party:</span>
+            <span id="partyCount">7</span>
         </div>
-        <div class="stat">
-            <div class="icon weapon-icon"></div>
-            <span id="weapons">0</span>
-        </div>
-        <div class="stat">
-            <div class="icon rooms-icon"></div>
-            <span id="roomsLeft">64</span>
+        <div class="status-item">
+            <span class="status-emoji">🧪</span>
+            <span class="status-label">Potions:</span>
+            <span id="potions">1</span>
         </div>
     </div>
 
-    <div style="text-align: center; margin: 20px 0;">
-        <span id="currentUserDisplay" style="color: var(--accent); font-weight: bold; margin-right: 20px;">User: Not logged in</span>
-        <button id="changeUserBtn">Change User</button>
-        <button id="startBtn">Start</button>
-        <button id="restart">Restart</button>
-        <button id="leaderboardBtn">Leaderboard</button>
+    <!-- Rooms Left and Action Buttons -->
+    <div class="action-bar">
+        <div class="rooms-left">
+            <span class="status-emoji">🏠</span>
+            <span class="status-label">Rooms Left:</span>
+            <span id="roomsLeft">0</span>
+        </div>
+        <div class="game-buttons">
+            <button id="startBtn">START</button>
+            <button id="restartBtn">RESTART</button>
+            <button id="leaderboardBtn">LEADERBOARD</button>
+        </div>
     </div>
 
     <div class="main-layout">
         <div id="game" class="game-grid"></div>
         
         <div class="log-panel">
-            <h2>Dungeon Log</h2>
+            <h2>Log</h2>
             <div id="log" class="log-entries"></div>
         </div>
     </div>

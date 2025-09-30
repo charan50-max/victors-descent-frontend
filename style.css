@@ -1,6 +1,8 @@
 :root {
     --tile-size: 58px;
     --accent: #ffd27f;
+    --dark-wood: #3a2616;
+    --light-wood: #8b7355;
 }
 
 body {
@@ -116,65 +118,113 @@ body {
     100% { transform: rotate(3deg); }
 }
 
-/* Stats Bar */
-.stats-bar {
-    margin: 30px auto;
-    padding: 18px 30px;
+/* User Info Bar */
+.user-info-bar {
     display: flex;
-    justify-content: center;
-    gap: 35px;
-    flex-wrap: wrap;
-    background: linear-gradient(#3d2b1f, #261a12);
-    border: 3px solid #000;
-    border-radius: 14px;
-    box-shadow: inset 0 0 10px #000, 0 8px 20px rgba(0,0,0,0.8);
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, var(--dark-wood), var(--light-wood));
+    border: 3px solid #2b1608;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
 }
 
-.stat {
-    font-size: 26px;
+#currentUserDisplay {
+    font-size: 18px;
     font-weight: bold;
     color: var(--accent);
-    text-shadow: 2px 3px 6px #000;
+    text-shadow: 2px 2px 4px #000;
+}
+
+#changeUserBtn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #7a4b23, #4e2c13);
+    color: var(--accent);
+    border: 2px solid #2b1608;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+}
+
+#changeUserBtn:hover {
+    background: linear-gradient(135deg, #a75e28, #6a3c1c);
+    transform: scale(1.05);
+}
+
+/* Status Bar */
+.status-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 90%;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background: linear-gradient(135deg, #2d1f15, #1a1109);
+    border: 3px solid var(--light-wood);
+    border-radius: 15px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.status-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--accent);
+    text-shadow: 2px 2px 4px #000;
 }
 
-.stat .icon {
-    width: 30px;
-    height: 30px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+.status-emoji {
+    font-size: 24px;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
 }
 
-/* Icon Images for Stats */
-.heart-icon {
-    background-image: url('images/heart.png');
+.status-label {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.party-icon {
-    background-image: url('images/party.png');
+/* Action Bar */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, var(--dark-wood), var(--light-wood));
+    border: 3px solid #2b1608;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
 }
 
-.ally-icon {
-    background-image: url('images/teammate.png');
+.rooms-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--accent);
+    text-shadow: 2px 2px 4px #000;
 }
 
-.potion-icon {
-    background-image: url('images/potion.png');
-}
-
-.armour-icon {
-    background-image: url('images/armour.png');
-}
-
-.weapon-icon {
-    background-image: url('images/weapon.png');
-}
-
-.rooms-icon {
-    background-image: url('images/door.png');
+.game-buttons {
+    display: flex;
+    gap: 15px;
 }
 
 /* Layout: grid + log side by side */
@@ -248,19 +298,6 @@ body {
     background: url("images/ogre.png") center/cover no-repeat; 
 }
 
-.enemy-demon.revealed { 
-    background: url("images/demon.png") center/cover no-repeat; 
-}
-
-/* Defeat / Death */
-.cell.dead { 
-    background: url("images/dead.png") center/cover no-repeat; 
-}
-
-.cell.defeated { 
-    outline: 3px solid limegreen; 
-}
-
 /* Dungeon Log */
 .log-panel {
     width: 320px;
@@ -311,22 +348,22 @@ button {
     background: linear-gradient(#7a4b23, #4e2c13);
     border: 3px solid #2b1608;
     color: var(--accent);
-    font-size: 22px;
+    font-size: 16px;
     font-weight: 800;
-    padding: 14px 28px;
-    border-radius: 12px;
+    padding: 12px 20px;
+    border-radius: 8px;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.7), inset 0 0 8px rgba(255,200,120,0.3);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.7), inset 0 0 8px rgba(255,200,120,0.3);
     transition: all 0.2s ease;
-    margin: 0 5px;
+    margin: 0 3px;
 }
 
 button:hover {
     background: linear-gradient(#a75e28, #6a3c1c);
-    box-shadow: 0 10px 26px rgba(0,0,0,0.8), 0 0 12px rgba(255,210,127,0.6);
-    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.8), 0 0 12px rgba(255,210,127,0.6);
+    transform: scale(1.05);
 }
 
 /* Message popup */
@@ -384,12 +421,18 @@ button:hover {
         max-width: 500px;
     }
     
-    .stats-bar {
-        gap: 15px;
+    .status-bar {
+        gap: 10px;
     }
     
-    .stat {
-        font-size: 20px;
+    .status-item {
+        font-size: 16px;
+    }
+    
+    .action-bar {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
     }
 }
 
