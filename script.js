@@ -8,8 +8,9 @@ let gameActive = false;
 let inProgress = false;
 let messageTimeoutId = null;
 
-let currentUserId = localStorage.getItem('dungeon_user_id') || null;
-let currentUsername = localStorage.getItem('dungeon_username') || null;
+// Clear any existing user data on page load to force fresh login
+let currentUserId = null;
+let currentUsername = null;
 
 const hero = {
   lives: 3,
@@ -369,7 +370,6 @@ function showLoginModal() {
   const modal = document.getElementById('welcomeModal');
   if (modal) {
     modal.classList.remove('hidden');
-    modal.style.display = 'flex';
   }
 }
 
@@ -377,24 +377,28 @@ function hideLoginModal() {
   const modal = document.getElementById('welcomeModal');
   if (modal) {
     modal.classList.add('hidden');
-    modal.style.display = 'none';
   }
   const usernameInput = document.getElementById('usernameInput');
+  const loginError = document.getElementById('loginError');
   if (usernameInput) usernameInput.value = '';
+  if (loginError) loginError.textContent = '';
 }
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM loaded, initializing...');
   
+  // Clear localStorage to force fresh login
+  localStorage.removeItem('dungeon_username');
+  localStorage.removeItem('dungeon_user_id');
+  currentUsername = null;
+  currentUserId = null;
+  
   // Update UI first
   updateUI();
   
-  // Show login modal if no user
-  if (!currentUsername) {
-    console.log('No user found, showing login modal');
-    showLoginModal();
-  }
+  // Always show login modal at startup
+  showLoginModal();
   
   // Load leaderboard
   fetchLeaderboard();
@@ -402,70 +406,65 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set up event listeners
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
-    console.log('Start button found, adding listener');
     startBtn.addEventListener('click', function() {
-      console.log('Start button clicked');
+      if (!currentUsername) {
+        message('Please login first!', 'death');
+        showLoginModal();
+        return;
+      }
       createGrid();
       logEvent('A new descent begins.', 'info');
     });
   }
 
-  const restartBtn = document.getElementById('restart');
+  const restartBtn = document.getElementById('restartBtn');
   if (restartBtn) {
-    console.log('Restart button found, adding listener');
     restartBtn.addEventListener('click', function() {
-      console.log('Restart button clicked');
+      if (!currentUsername) {
+        message('Please login first!', 'death');
+        showLoginModal();
+        return;
+      }
       createGrid();
       logEvent('Run reset.', 'info');
     });
   }
 
   // Login form handler
-  const loginBtn = document.querySelector('button[type="submit"]');
-  const usernameInput = document.getElementById('usernameInput');
-  
-  if (loginBtn && usernameInput) {
-    console.log('Login form found, adding listener');
-    loginBtn.addEventListener('click', async function(e) {
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      console.log('Login button clicked');
       
-      const username = usernameInput.value.trim();
+      const usernameInput = document.getElementById('usernameInput');
+      const loginError = document.getElementById('loginError');
+      const username = usernameInput?.value?.trim();
+      
       if (!username) {
-        message('Please enter a username', 'death');
+        if (loginError) loginError.textContent = 'Please enter a username';
         return;
       }
       
       try {
-        console.log('Attempting to register user:', username);
         await registerUser(username);
         updateUserDisplay();
         hideLoginModal();
         message(`Logged in as ${currentUsername}`, 'safe');
       } catch (err) {
         console.error('Login error:', err);
-        message('Login failed. Please try again.', 'death');
+        if (loginError) loginError.textContent = 'Login failed. Please try again.';
       }
     });
-  }
-
-  // Close modal handler
-  const closeBtn = document.getElementById('closeModal');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', hideLoginModal);
   }
 
   // Leaderboard button
   const leaderboardBtn = document.getElementById('leaderboardBtn');
   if (leaderboardBtn) {
-    console.log('Leaderboard button found, adding listener');
     leaderboardBtn.addEventListener('click', function() {
-      console.log('Leaderboard button clicked');
       const leaderboardContainer = document.getElementById('leaderboardContainer');
       if (leaderboardContainer) {
-        const isHidden = leaderboardContainer.style.display === 'none';
-        leaderboardContainer.style.display = isHidden ? 'block' : 'none';
-        if (isHidden) {
+        leaderboardContainer.classList.toggle('collapsed');
+        if (!leaderboardContainer.classList.contains('collapsed')) {
           fetchLeaderboard();
         }
       }
@@ -475,14 +474,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Change user button
   const changeUserBtn = document.getElementById('changeUserBtn');
   if (changeUserBtn) {
-    changeUserBtn.addEventListener('click', showLoginModal);
+    changeUserBtn.addEventListener('click', function() {
+      showLoginModal();
+    });
   }
 
   console.log('Initialization complete');
 });
-
-// Fallback for already loaded DOM
-if (document.readyState !== 'loading') {
-  document.dispatchEvent(new Event('DOMContentLoaded'));
-}
 
