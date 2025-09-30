@@ -294,7 +294,7 @@ leaderboardBtn.addEventListener("click", () => {
 });
 
 function fetchLeaderboard() {
-  fetch('https://victors-descent-backend.onrender.com')
+  fetch('https://victors-descent-backend.onrender.com/leaderboard')
     .then(response => response.json())
     .then(rows => {
       leaderboardBody.innerHTML = "";
