@@ -258,7 +258,7 @@ function checkVictory() {
 }
 
 function postResult({ victory, defeat, explored }) {
-  fetch('https://victors-descent-backend.onrender.com', {
+  fetch('https://victors-descent-backend.onrender.com/update-leaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -333,7 +333,7 @@ loginForm.onsubmit = function(e) {
     loginError.textContent = "Please enter a username.";
     return;
   }
-  fetch('https://victors-descent-backend.onrender.com', {
+  fetch('https://victors-descent-backend.onrender.com/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username })
