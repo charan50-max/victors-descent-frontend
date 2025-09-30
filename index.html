@@ -4,74 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Victor's Descent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Login Modal -->
     <div id="welcomeModal" class="modal">
         <div class="modal-content">
-            <h2>Welcome to Victor's Descent</h2>
+            <h1>Welcome to Victor's Descent</h1>
             <p>Enter your username to begin your adventure:</p>
             <form id="loginForm">
-                <input type="text" id="usernameInput" placeholder="Enter username" required>
+                <input type="text" id="usernameInput" placeholder="Enter your username" maxlength="20" required>
                 <button type="submit" id="loginBtn">LOGIN/REGISTER</button>
                 <div id="loginError" class="error-message"></div>
             </form>
         </div>
     </div>
 
-    <!-- Main Game Container -->
-    <div id="gameContainer" class="game-container">
-        <h1>VICTOR'S DESCENT</h1>
-        
-        <!-- User Info -->
-        <div class="user-info">
-            <span id="currentUserDisplay">User: Not logged in</span>
-            <button id="changeUserBtn" class="change-user-btn">Change User</button>
-        </div>
+    <!-- Main Game -->
+    <div class="swing-board">
+        <h1 class="board-text">VICTOR'S DESCENT</h1>
+    </div>
 
-        <!-- Game Controls -->
-        <div class="controls">
-            <button id="startBtn" class="btn">Start Game</button>
-            <button id="restartBtn" class="btn">Restart</button>
-            <button id="leaderboardBtn" class="btn">Leaderboard</button>
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="icon heart-icon"></div>
+            <span id="lives">3</span>
         </div>
-
-        <!-- Hero Stats -->
-        <div class="stats">
-            <div class="stat-item">Lives: <span id="lives">3</span></div>
-            <div class="stat-item">Party: <span id="partyCount">1</span></div>
-            <div class="stat-item">Allies: <span id="allyCount">0</span></div>
-            <div class="stat-item">Potions: <span id="potions">0</span></div>
-            <div class="stat-item">Armour: <span id="armour">0</span></div>
-            <div class="stat-item">Weapons: <span id="weapons">0</span></div>
-            <div class="stat-item">Rooms Left: <span id="roomsLeft">64</span></div>
+        <div class="stat">
+            <div class="icon party-icon"></div>
+            <span id="partyCount">1</span>
         </div>
+        <div class="stat">
+            <div class="icon ally-icon"></div>
+            <span id="allyCount">0</span>
+        </div>
+        <div class="stat">
+            <div class="icon potion-icon"></div>
+            <span id="potions">0</span>
+        </div>
+        <div class="stat">
+            <div class="icon armour-icon"></div>
+            <span id="armour">0</span>
+        </div>
+        <div class="stat">
+            <div class="icon weapon-icon"></div>
+            <span id="weapons">0</span>
+        </div>
+        <div class="stat">
+            <div class="icon rooms-icon"></div>
+            <span id="roomsLeft">64</span>
+        </div>
+    </div>
 
-        <!-- Game Grid -->
+    <div style="text-align: center; margin: 20px 0;">
+        <span id="currentUserDisplay" style="color: var(--accent); font-weight: bold; margin-right: 20px;">User: Not logged in</span>
+        <button id="changeUserBtn">Change User</button>
+        <button id="startBtn">Start</button>
+        <button id="restart">Restart</button>
+        <button id="leaderboardBtn">Leaderboard</button>
+    </div>
+
+    <div class="main-layout">
         <div id="game" class="game-grid"></div>
-
-        <!-- Message Display -->
-        <div id="message" class="message"></div>
-
-        <!-- Game Log -->
-        <div id="log" class="log"></div>
-
-        <!-- Leaderboard -->
-        <div id="leaderboardContainer" class="leaderboard-container collapsed">
-            <h3>Leaderboard</h3>
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody">
-                    <tr><td colspan="2">Loading...</td></tr>
-                </tbody>
-            </table>
+        
+        <div class="log-panel">
+            <h2>Dungeon Log</h2>
+            <div id="log" class="log-entries"></div>
         </div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div id="leaderboard" style="display: none;">
+        <h2 style="color: var(--accent); text-align: center;">LEADERBOARD</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+                <tr><td colspan="2">Loading...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <script src="script.js"></script>

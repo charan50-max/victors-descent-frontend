@@ -143,16 +143,18 @@ async function submitScore(username, score) {
   }
 }
 
-// Game functions
+// Game functions - HARDER DIFFICULTY
 function generateRoomTypes() {
   const rooms = [];
-  for (let i = 0; i < 20; i++) rooms.push({ category: 'safe', type: 'empty' });
-  for (let i = 0; i < 10; i++) rooms.push({ category: 'safe', type: 'potion' });
-  for (let i = 0; i < 10; i++) rooms.push({ category: 'safe', type: 'armour' });
-  for (let i = 0; i < 10; i++) rooms.push({ category: 'safe', type: 'weapon' });
+  // Reduced safe rooms
+  for (let i = 0; i < 16; i++) rooms.push({ category: 'safe', type: 'empty' });
+  for (let i = 0; i < 8; i++) rooms.push({ category: 'safe', type: 'potion' });
+  for (let i = 0; i < 8; i++) rooms.push({ category: 'safe', type: 'armour' });
+  for (let i = 0; i < 8; i++) rooms.push({ category: 'safe', type: 'weapon' });
   for (let i = 0; i < 6; i++) rooms.push({ category: 'safe', type: 'teammate' });
-  for (let i = 0; i < 4; i++) rooms.push({ category: 'danger', type: 'ogre' });
-  for (let i = 0; i < 4; i++) rooms.push({ category: 'danger', type: 'goblin' });
+  // Increased danger rooms
+  for (let i = 0; i < 9; i++) rooms.push({ category: 'danger', type: 'ogre' });
+  for (let i = 0; i < 9; i++) rooms.push({ category: 'danger', type: 'goblin' });
   return shuffle(rooms);
 }
 
@@ -248,7 +250,7 @@ function revealRoom(cell) {
     return;
   }
 
-  // Danger/combat
+  // Danger/combat - ORIGINAL DIFFICULTY
   switch (cell.type) {
     case 'ogre':
       el.classList.add('enemy-ogre');
@@ -417,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  const restartBtn = document.getElementById('restartBtn');
+  const restartBtn = document.getElementById('restart');
   if (restartBtn) {
     restartBtn.addEventListener('click', function() {
       if (!currentUsername) {
@@ -461,10 +463,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const leaderboardBtn = document.getElementById('leaderboardBtn');
   if (leaderboardBtn) {
     leaderboardBtn.addEventListener('click', function() {
-      const leaderboardContainer = document.getElementById('leaderboardContainer');
-      if (leaderboardContainer) {
-        leaderboardContainer.classList.toggle('collapsed');
-        if (!leaderboardContainer.classList.contains('collapsed')) {
+      const leaderboard = document.getElementById('leaderboard');
+      if (leaderboard) {
+        const isHidden = leaderboard.style.display === 'none';
+        leaderboard.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
           fetchLeaderboard();
         }
       }
