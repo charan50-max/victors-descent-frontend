@@ -1,7 +1,20 @@
 // ----------------------
 // Config
 // ----------------------
+// example
 const API_BASE = 'https://victors-descent-backend.onrender.com';
+const username = usernameInput.value.trim();
+
+const res = await fetch(`${API_BASE}/register`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username })
+});
+const data = await res.json();
+// expect: { id, username }
+localStorage.setItem('dungeon_username', data.username);
+if (data.id) localStorage.setItem('dungeon_user_id', data.id);
+
 
 // ----------------------
 // State
