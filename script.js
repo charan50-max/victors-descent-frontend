@@ -288,9 +288,9 @@ function revealRoom(cell) {
   if (hero.lives <= 0) {
     message('Victor was slain...', 'death');
     revealAll();
-    hero.revealedCount = TOTAL_CELLS;
     updateUI();
     gameActive = false;
+    // FIXED: Don't change hero.revealedCount here - keep the actual rooms explored
     postResult({ victory: 0, defeat: 1, explored: hero.revealedCount });
   }
 }
@@ -316,8 +316,13 @@ function checkVictory() {
 }
 
 function computeScore({ victory, defeat, explored }) {
-  const bonus = victory ? 50 : 0;
-  return Math.max(0, Number(explored || 0) + bonus);
+  // FIXED: Proper scoring system
+  // Base score = rooms actually explored
+  // Victory bonus = 50 points
+  // No penalty for death - just no bonus
+  const baseScore = Number(explored || 0);
+  const victoryBonus = victory ? 50 : 0;
+  return Math.max(0, baseScore + victoryBonus);
 }
 
 async function postResult({ victory, defeat, explored }) {
@@ -328,9 +333,13 @@ async function postResult({ victory, defeat, explored }) {
       return;
     }
     const score = computeScore({ victory, defeat, explored });
+    console.log(`Submitting score: ${score} (explored: ${explored}, victory: ${victory})`);
     await submitScore(currentUsername, score);
     message(`Score submitted: ${score}`, 'info');
-    fetchLeaderboard();
+    // Force refresh leaderboard after a short delay to ensure backend update is complete
+    setTimeout(() => {
+      fetchLeaderboard();
+    }, 500);
   } catch (e) {
     console.error('Score submit error:', e);
     message('Could not submit score.', 'death');
@@ -339,6 +348,7 @@ async function postResult({ victory, defeat, explored }) {
 
 async function fetchLeaderboard() {
   try {
+    console.log('Fetching leaderboard...');
     const rows = await getLeaderboard();
     const leaderboardBody = document.getElementById('leaderboardBody');
     if (!leaderboardBody) return;
@@ -350,6 +360,7 @@ async function fetchLeaderboard() {
       return;
     }
 
+    console.log('Leaderboard data:', rows);
     rows.forEach((r, idx) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
