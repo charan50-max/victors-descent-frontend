@@ -1,20 +1,7 @@
 // ----------------------
 // Config
 // ----------------------
-// example
 const API_BASE = 'https://victors-descent-backend.onrender.com';
-const username = usernameInput.value.trim();
-
-const res = await fetch(`${API_BASE}/register`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ username })
-});
-const data = await res.json();
-// expect: { id, username }
-localStorage.setItem('dungeon_username', data.username);
-if (data.id) localStorage.setItem('dungeon_user_id', data.id);
-
 
 // ----------------------
 // State
@@ -67,6 +54,8 @@ const roomsLeftEl = document.getElementById('roomsLeft');
 const currentUserDisplay = document.getElementById('currentUserDisplay');
 const changeUserBtn = document.getElementById('changeUserBtn');
 
+// Login/welcome modal elements
+const modal = document.getElementById('welcomeModal');
 const loginModal = document.getElementById('loginModal');
 const closeLoginModal = document.getElementById('closeLoginModal');
 const loginForm = document.getElementById('loginForm');
@@ -86,14 +75,15 @@ function shuffle(array) {
 
 function setMessage(txt) {
   if (messageTimeoutId) clearTimeout(messageTimeoutId);
-  messageDiv.innerText = txt || '';
+  if (messageDiv) messageDiv.innerText = txt || '';
   messageTimeoutId = setTimeout(() => {
-    messageDiv.innerText = '';
+    if (messageDiv) messageDiv.innerText = '';
     messageTimeoutId = null;
   }, 3000);
 }
 
 function logEvent(text, type = 'info') {
+  if (!logDiv) return;
   const entry = document.createElement('div');
   entry.className = `log-entry ${type}`;
   entry.innerText = text;
@@ -107,18 +97,19 @@ function message(txt, type = 'info') {
 }
 
 function updateUserDisplay() {
-  if (!currentUserDisplay) return;
-  currentUserDisplay.innerHTML = `User: ${currentUsername || 'Not logged in'}`;
+  if (currentUserDisplay) {
+    currentUserDisplay.innerHTML = `User: ${currentUsername || 'Not logged in'}`;
+  }
 }
 
 function updateUI() {
-  partyCountEl.innerText = hero.party;
-  allyCountEl.innerText = hero.allies;
-  potionsEl.innerText = hero.potions;
-  armourEl.innerText = hero.armour;
-  weaponsEl.innerText = hero.weapons;
-  livesEl.innerText = hero.lives;
-  roomsLeftEl.innerText = Math.max(0, TOTAL_CELLS - hero.revealedCount);
+  if (partyCountEl) partyCountEl.innerText = hero.party;
+  if (allyCountEl) allyCountEl.innerText = hero.allies;
+  if (potionsEl) potionsEl.innerText = hero.potions;
+  if (armourEl) armourEl.innerText = hero.armour;
+  if (weaponsEl) weaponsEl.innerText = hero.weapons;
+  if (livesEl) livesEl.innerText = hero.lives;
+  if (roomsLeftEl) roomsLeftEl.innerText = Math.max(0, TOTAL_CELLS - hero.revealedCount);
   updateUserDisplay();
 }
 
@@ -126,21 +117,31 @@ function updateUI() {
 // API helpers
 // ----------------------
 async function api(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options
-  });
-  // Try to parse JSON; if not JSON, throw
-  const text = await res.text();
-  let json;
-  try { json = text ? JSON.parse(text) : {}; } catch { json = {}; }
-  if (!res.ok) {
-    const err = new Error(json?.error || `HTTP ${res.status}`);
-    err.status = res.status;
-    err.body = json;
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options
+    });
+    
+    const text = await res.text();
+    let json;
+    try { 
+      json = text ? JSON.parse(text) : {}; 
+    } catch { 
+      json = {}; 
+    }
+    
+    if (!res.ok) {
+      const err = new Error(json?.error || `HTTP ${res.status}`);
+      err.status = res.status;
+      err.body = json;
+      throw err;
+    }
+    return json;
+  } catch (err) {
+    console.error('API Error:', err);
     throw err;
   }
-  return json;
 }
 
 // POST /register { username }
@@ -149,7 +150,7 @@ async function registerUser(username) {
     method: 'POST',
     body: JSON.stringify({ username })
   });
-  // Expect { id, username }
+  
   currentUsername = data.username || username;
   currentUserId = data.id || null;
   localStorage.setItem('dungeon_username', currentUsername);
@@ -189,14 +190,14 @@ function generateRoomTypes() {
 
 function createGrid() {
   grid = [];
-  gameContainer.innerHTML = '';
+  if (gameContainer) gameContainer.innerHTML = '';
 
   const roomTypes = generateRoomTypes();
 
   for (let i = 0; i < TOTAL_CELLS; i++) {
     const cellEl = document.createElement('div');
     cellEl.classList.add('cell');
-    gameContainer.appendChild(cellEl);
+    if (gameContainer) gameContainer.appendChild(cellEl);
 
     const room = roomTypes[i];
     grid.push({
@@ -345,20 +346,19 @@ function checkVictory() {
 // Results -> Leaderboard
 // ----------------------
 function computeScore({ victory, defeat, explored }) {
-  // Simple scoring: rooms explored + small bonus for victory
   const bonus = victory ? 50 : 0;
   return Math.max(0, Number(explored || 0) + bonus);
 }
 
 async function postResult({ victory, defeat, explored }) {
   try {
-    // Require a username to post scores
     if (!currentUsername) {
       message('Login to submit your score.', 'info');
       return;
     }
     const score = computeScore({ victory, defeat, explored });
     await submitScore(currentUsername, score);
+    message(`Score submitted: ${score}`, 'info');
     fetchLeaderboard(); // refresh table after submit
   } catch (e) {
     console.error('Score submit error:', e);
@@ -368,12 +368,13 @@ async function postResult({ victory, defeat, explored }) {
 
 async function fetchLeaderboard() {
   try {
-    const rows = await getLeaderboard(); // [{ username, score }]
+    const rows = await getLeaderboard();
+    if (!leaderboardBody) return;
+    
     leaderboardBody.innerHTML = '';
 
     if (!rows.length) {
-      leaderboardBody.innerHTML =
-        `<tr><td colspan="2">No data</td></tr>`;
+      leaderboardBody.innerHTML = `<tr><td colspan="2">No data</td></tr>`;
       return;
     }
 
@@ -387,46 +388,26 @@ async function fetchLeaderboard() {
     });
   } catch (e) {
     console.error('Leaderboard error:', e);
-    leaderboardBody.innerHTML =
-      `<tr><td colspan="2">Leaderboard error</td></tr>`;
+    if (leaderboardBody) {
+      leaderboardBody.innerHTML = `<tr><td colspan="2">Leaderboard error</td></tr>`;
+    }
   }
 }
 
 // ----------------------
 // Auth / Login UI
 // ----------------------
-function openLogin() {
+function openLoginModal() {
+  if (modal) modal.classList.remove('hidden');
   if (loginModal) loginModal.classList.remove('hidden');
-  loginError.innerText = '';
+  if (loginError) loginError.innerText = '';
 }
 
-function closeLogin() {
+function closeLoginModal() {
+  if (modal) modal.classList.add('hidden');
   if (loginModal) loginModal.classList.add('hidden');
-  usernameInput.value = '';
-  loginError.innerText = '';
-}
-
-if (changeUserBtn) changeUserBtn.addEventListener('click', openLogin);
-if (closeLoginModal) closeLoginModal.addEventListener('click', closeLogin);
-
-if (loginForm) {
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const username = (usernameInput.value || '').trim();
-    if (!username) {
-      loginError.innerText = 'Username required';
-      return;
-    }
-    try {
-      await registerUser(username);
-      updateUserDisplay();
-      closeLogin();
-      message(`Logged in as ${currentUsername}`, 'safe');
-    } catch (err) {
-      console.error('Register error:', err);
-      loginError.innerText = 'Server error';
-    }
-  });
+  if (usernameInput) usernameInput.value = '';
+  if (loginError) loginError.innerText = '';
 }
 
 // ----------------------
@@ -446,24 +427,80 @@ if (restartBtn) {
   });
 }
 
+if (changeUserBtn) {
+  changeUserBtn.addEventListener('click', openLoginModal);
+}
+
+if (closeLoginModal) {
+  closeLoginModal.addEventListener('click', closeLoginModal);
+}
+
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = (usernameInput?.value || '').trim();
+    if (!username) {
+      if (loginError) loginError.innerText = 'Username required';
+      return;
+    }
+    try {
+      await registerUser(username);
+      updateUserDisplay();
+      closeLoginModal();
+      message(`Logged in as ${currentUsername}`, 'safe');
+    } catch (err) {
+      console.error('Register error:', err);
+      if (loginError) loginError.innerText = 'Server error. Please try again.';
+    }
+  });
+}
+
 if (leaderboardHeader) {
   leaderboardHeader.addEventListener('click', () => {
-    leaderboardContent.classList.toggle('collapsed');
-    if (!leaderboardContent.classList.contains('collapsed')) {
-      fetchLeaderboard();
+    if (leaderboardContent) {
+      leaderboardContent.classList.toggle('collapsed');
+      if (!leaderboardContent.classList.contains('collapsed')) {
+        fetchLeaderboard();
+      }
     }
   });
 }
 
 if (leaderboardBtn) {
   leaderboardBtn.addEventListener('click', () => {
-    leaderboardContent.classList.toggle('collapsed');
-    if (!leaderboardContent.classList.contains('collapsed')) {
-      fetchLeaderboard();
+    if (leaderboardContent) {
+      leaderboardContent.classList.toggle('collapsed');
+      if (!leaderboardContent.classList.contains('collapsed')) {
+        fetchLeaderboard();
+      }
     }
   });
 }
 
-// Initial UI
-updateUI();
+// ----------------------
+// Initialization
+// ----------------------
+document.addEventListener('DOMContentLoaded', () => {
+  updateUI();
+  
+  // Show login modal if no user is logged in
+  if (!currentUsername) {
+    openLoginModal();
+  }
+  
+  // Load leaderboard on startup
+  fetchLeaderboard();
+});
+
+// Fallback initialization if DOMContentLoaded already fired
+if (document.readyState === 'loading') {
+  // DOMContentLoaded listener above will handle this
+} else {
+  // DOM already loaded
+  updateUI();
+  if (!currentUsername) {
+    openLoginModal();
+  }
+  fetchLeaderboard();
+}
 
